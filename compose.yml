@@ -1,0 +1,24 @@
+services:
+  api:
+    image: redteamsubnet61/rest.device-fp-gate:latest
+    build:
+      context: .
+    restart: unless-stopped
+    environment:
+      TERM: ${TERM:-xterm}
+      TZ: ${TZ:-UTC}
+      DFG_API_PORT: ${DFG_API_PORT:-8000}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - "api-logs:${DFG_API_LOGS_DIR:-/var/log/rest.device-fp-gate}"
+      - "api-data:${DFG_API_DATA_DIR:-/var/lib/rest.device-fp-gate}"
+    ports:
+      - "${DFG_API_PORT:-8000}:${DFG_API_PORT:-8000}"
+    tty: true
+
+
+volumes:
+  api-logs:
+  api-data:
