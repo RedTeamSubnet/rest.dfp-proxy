@@ -27,12 +27,12 @@ async function sendFingerprint(payload) {
         body: JSON.stringify(payload),
         headers: {
             "Content-Type": "application/json",
-            Accept: "application/json"
+            "Accept": "application/json"
         }
     };
 
     try {
-        const response = await fetch(window.FINGERPRINT_ENDPOINT, request);
+        const response = await fetch(window.ENDPOINT, request);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

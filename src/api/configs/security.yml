@@ -30,3 +30,5 @@ api:
       pepper: "DFG_PASSWORD_PEPPER123" # This should be a random string, and read from an environment variable!
       min_length: 8
       max_length: 128
+    auth:
+      key: "secret-key"

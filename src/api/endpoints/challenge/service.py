@@ -7,6 +7,7 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from api.config import config
 
 _src_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
 
@@ -15,7 +16,10 @@ _src_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
 def get_web(request: Request) -> HTMLResponse:
     """Get the web interface for the challenge"""
 
-    _templates = Jinja2Templates(directory=(_src_dir / "api" / "templates"))
-    _html_response = _templates.TemplateResponse(request=request, name="index.html")
-
-    return _html_response
+    templates = Jinja2Templates(directory=str(_src_dir / "templates"))
+    html_response = templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"challenger_url": config.challenger_url},
+    )
+    return html_response

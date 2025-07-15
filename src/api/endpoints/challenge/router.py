@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
+import requests
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
 from api.logger import logger
+from api.config import config
 
 from . import service
 
@@ -41,7 +42,47 @@ def get_web(request: Request):
     return _html_response
 
 
+@router.post(
+    "/sync-fp",
+    summary="Syncs the fingerprint",
+    description="This endpoint receives the fingerprint data from the client and sends it to another server.",
+    responses={200: {}, 500: {}},
+)
+async def sync_fp(request: Request):
+    _request_id = request.state.request_id
+    logger.info(f"[{_request_id}] - Sending fingerprint...")
+
+    try:
+        payload = await request.json()
+        logger.info(f"[{_request_id}] - Sending fingerprint data: {payload}")
+        _url = config.challenger_url
+
+        try:
+            requests.post(
+                url=_url,
+                json=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": f"Bearer {config.api.security.auth_key}",
+                },
+            )
+        except requests.RequestException as e:
+            logger.error(f"[{_request_id}] - Request failed: {e}")
+            raise HTTPException(
+                status_code=500, detail="Failed to send fingerprint data"
+            )
+
+        logger.info(f"[{_request_id}] - Fingerprint data received successfully.")
+    except Exception as err:
+        logger.error(f"[{_request_id}] - Failed to send fingerprint: {err}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    return {"message": "Fingerprint received successfully."}
+
+
 __all__ = [
     "router",
     "get_web",
+    "sync_fp",
 ]
