@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprinter</title>
+
+    <script>window.FINGERPRINT_ENDPOINT = 'http://localhost:8000/_sync_fp';</script>
+
+	<script defer src="/static/fingerprinter/fingerprinter.js"></script>
+    <style>
+        #log {
+            font-family: monospace;
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="log"></div>
+    <script>
+        const logElement = document.getElementById('log');
+        if (logElement) {
+            const logMethods = {
+                log: 'black',
+                error: 'red',
+                warn: 'orange',
+                info: 'blue'
+            };
+
+            Object.entries(logMethods).forEach(([method, color]) => {
+                const original = console[method];
+                console[method] = (...args) => {
+                    original.apply(console, args);
+                    const message = document.createElement('div');
+                    message.style.color = color;
+                    message.textContent = args.map(arg =>
+                        typeof arg === 'object' && arg !== null
+                            ? JSON.stringify(arg, null, 2)
+                            : String(arg)
+                    ).join(' ');
+                    logElement.appendChild(message);
+                };
+            });
+        }
+    </script>
+</body>
+</html>
