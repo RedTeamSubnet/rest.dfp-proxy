@@ -25,8 +25,14 @@ class MainConfig(FrozenBaseConfig):
     )
     api: ApiConfig = Field(...)
     logger: LoggerConfigPM = Field(default_factory=LoggerConfigPM)
-    challenger_url: str = Field(
-        default="http://localhost:10001/get-fp",
+    challenger_hostname: str = Field(
+        default="localhost",
+    )
+    challenger_port: int = Field(
+        default=8000,
+    )
+    sync_url: str = Field(
+        default="http://localhost:8000/sync-fp",
     )
 
     @field_validator("env")
