@@ -14,7 +14,7 @@ from api.config import config
 from api.logger import logger
 from api.endpoints.challenge.schemas import Fingerprinter
 
-_src_dir = pathlib.Path(__file__).parent.parent.parent.parent.resolve()
+_src_dir = pathlib.Path(__file__).resolve().parents[3]
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -80,7 +80,7 @@ def write_fpr(request: Request, fingerprinter: Fingerprinter):
 
     try:
         _fingerprinter_js_path = (
-            _src_dir / "static" / "fingerprinter" / "fingerprinter.js"
+            _src_dir / "templates" / "static" / "fingerprinter" / "fingerprinter.js"
         )
         _fingerprinter_js_content = fingerprinter.fingerprinter_js
 
