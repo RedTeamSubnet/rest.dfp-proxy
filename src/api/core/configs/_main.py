@@ -32,7 +32,7 @@ class MainConfig(FrozenBaseConfig):
         default=8000,
     )
     sync_url: str = Field(
-        default="http://localhost:8000/sync-fp",
+        default="http://localhost:8000/fp",
     )
 
     @field_validator("env")

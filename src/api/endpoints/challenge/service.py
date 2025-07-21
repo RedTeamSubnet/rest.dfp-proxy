@@ -31,7 +31,7 @@ def get_web(request: Request) -> HTMLResponse:
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
-async def sync_fp(request: Request):
+async def async_fp(request: Request):
     """
     Asynchronously syncs the fingerprint by forwarding the request body
     to the challenger service.
@@ -42,7 +42,7 @@ async def sync_fp(request: Request):
     try:
         payload = await request.json()
         challenger_url = (
-            f"http://{config.challenger_hostname}:{config.challenger_port}/get-fp"
+            f"http://{config.challenger_hostname}:{config.challenger_port}/fp"
         )
         async with httpx.AsyncClient() as client:
             response = await client.post(

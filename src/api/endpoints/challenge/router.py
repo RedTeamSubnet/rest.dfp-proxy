@@ -14,13 +14,13 @@ router = APIRouter(tags=["Challenge"])
 
 
 @router.post(
-    "/sync-fpr",
+    "/fpr",
     summary="Get Miner Fingerprinter",
     description="This endpoint retrieves the miner fingerprinter from the challenger container.",
     status_code=200,
     dependencies=[Depends(verify_token)],
 )
-def sync_fpr(request: Request, fingerprinter: Fingerprinter) -> dict:
+def fpr(request: Request, fingerprinter: Fingerprinter) -> dict:
     """
     Receives and stores the miner fingerprinter data.
     """
@@ -61,7 +61,7 @@ async def get_web(request: Request) -> HTMLResponse:
 
 
 @router.post(
-    "/sync-fp",
+    "/fp",
     summary="Syncs the fingerprint",
     description="This endpoint receives the fingerprint data and forwards it.",
 )
@@ -74,7 +74,7 @@ async def sync_fp(request: Request) -> dict:
 
     try:
         # Assumes service.sync_fp is an async function using httpx
-        await service.sync_fp(request=request)
+        await service.async_fp(request=request)
         logger.success(f"[{request_id}] - Successfully synced fingerprint.")
         return {"status": "success", "message": "Fingerprint synced successfully."}
     except httpx.RequestError as err:
