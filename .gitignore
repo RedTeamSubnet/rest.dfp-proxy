@@ -505,7 +505,7 @@ results/
 output/
 outputs/
 .benchmarks/
-rest.device-fp-gate/
+rest.dfp-proxy/
 
 # Files:
 log
@@ -521,7 +521,7 @@ results
 output
 outputs
 .benchmarks
-rest.device-fp-gate
+rest.dfp-proxy
 env
 *.bak
 pm2-process.json

@@ -1,8 +1,8 @@
 site_name: Device Fingerprinter Gate
 site_description: "This is a short description of the project."
-site_url: https://RedTeam.github.io/rest.device-fp-gate
-repo_name: RedTeam/rest.device-fp-gate
-repo_url: https://github.com/RedTeam/rest.device-fp-gate
+site_url: https://RedTeam.github.io/rest.dfp-proxy
+repo_name: RedTeam/rest.dfp-proxy
+repo_url: https://github.com/RedTeam/rest.dfp-proxy
 theme:
   name: material
   # name: readthedocs

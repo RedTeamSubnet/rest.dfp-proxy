@@ -14,6 +14,7 @@ from api.core.utils import validator
 from ._base import FrozenBaseConfig
 from ._dev import DevConfig, FrozenDevConfig
 from ._api import ApiConfig, FrozenApiConfig
+from ._challenge import ChallengeConfig
 
 
 # Main config schema:
@@ -24,16 +25,8 @@ class MainConfig(FrozenBaseConfig):
         default=__version__, min_length=3, max_length=32
     )
     api: ApiConfig = Field(...)
+    challenge: ChallengeConfig = Field(...)
     logger: LoggerConfigPM = Field(default_factory=LoggerConfigPM)
-    challenger_hostname: str = Field(
-        default="localhost",
-    )
-    challenger_port: int = Field(
-        default=8000,
-    )
-    sync_url: str = Field(
-        default="http://localhost:8000/fp",
-    )
 
     @field_validator("env")
     @classmethod

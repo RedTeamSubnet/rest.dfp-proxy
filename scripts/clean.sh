@@ -22,7 +22,7 @@ fi
 
 ## --- Variables --- ##
 # Load from envrionment variables:
-PROJECT_SLUG="${PROJECT_SLUG:-rest.device-fp-gate}"
+PROJECT_SLUG="${PROJECT_SLUG:-rest.dfp-proxy}"
 
 # Flags:
 _IS_ALL=false

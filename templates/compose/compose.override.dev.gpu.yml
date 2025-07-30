@@ -1,16 +1,16 @@
 services:
   api:
-    image: redteamsubnet61/rest.device-fp-gate:latest-gpu
+    image: redteamsubnet61/rest.dfp-proxy:latest-gpu
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
       CUDA_VISIBLE_DEVICES: ${CUDA_VISIBLE_DEVICES:-all}
     volumes:
-      - "./volumes/storage/rest.device-fp-gate/logs:${DFG_API_LOGS_DIR:-/var/log/rest.device-fp-gate}"
-      - "./volumes/storage/rest.device-fp-gate/data:${DFG_API_DATA_DIR:-/var/lib/rest.device-fp-gate}"
+      - "./volumes/storage/rest.dfp-proxy/logs:${DFP_PROXY_API_LOGS_DIR:-/var/log/rest.dfp-proxy}"
+      - "./volumes/storage/rest.dfp-proxy/data:${DFP_PROXY_API_DATA_DIR:-/var/lib/rest.dfp-proxy}"
       - "./scripts/docker/docker-entrypoint.sh:/usr/local/bin/docker-entrypoint.sh"
-      - "./src:/app/rest.device-fp-gate"
-      - "./volumes/.vscode-server:/home/dfg-user/.vscode-server"
+      - "./src:/app/rest.dfp-proxy"
+      - "./volumes/.vscode-server:/home/dfp-user/.vscode-server"
     # deploy:
     #   replicas: 0
     #   resources:
@@ -18,9 +18,9 @@ services:
     #       cpus: "0.5"
     #       memory: 512M
     # command: ["/bin/bash"]
-    # command: ["-b", "uvicorn main:app --host=0.0.0.0 --port=${DFG_API_PORT:-8000} --no-access-log --no-server-header --proxy-headers --forwarded-allow-ips='*' --reload --reload-include='*.yml' --reload-include='.env'"]
+    # command: ["-b", "uvicorn main:app --host=0.0.0.0 --port=${DFP_PROXY_API_PORT:-8000} --no-access-log --no-server-header --proxy-headers --forwarded-allow-ips='*' --reload --reload-include='*.yml' --reload-include='.env'"]
     # healthcheck:
-    #   test: ["CMD-SHELL", "curl -f http://localhost:${DFG_API_PORT:-8000}/api/v${DFG_API_VERSION:-1}/ping"]
+    #   test: ["CMD-SHELL", "curl -f http://localhost:${DFP_PROXY_API_PORT:-8000}/api/v${DFP_PROXY_API_VERSION:-1}/ping"]
     #   start_period: 30s
     #   start_interval: 1s
     #   interval: 5m
