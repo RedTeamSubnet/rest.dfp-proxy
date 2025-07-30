@@ -1,23 +1,24 @@
 # syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
 
 ARG BASE_IMAGE=ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG DFG_API_SLUG="rest.device-fp-gate"
+ARG DFP_PROXY_API_SLUG="rest.dfp-proxy"
 
 
 ## Here is the builder image:
 FROM ${BASE_IMAGE} AS builder
 
 ARG DEBIAN_FRONTEND
-ARG DFG_API_SLUG
+ARG DFP_PROXY_API_SLUG
 
 # ARG USE_GPU=false
 ARG PYTHON_VERSION=3.10
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-WORKDIR "/usr/src/${DFG_API_SLUG}"
+WORKDIR "/usr/src/${DFP_PROXY_API_SLUG}"
 
 RUN --mount=type=cache,target=/opt/conda/pkgs,sharing=private \
 	--mount=type=cache,target=/root/.cache,sharing=locked \
@@ -33,16 +34,13 @@ RUN --mount=type=cache,target=/opt/conda/pkgs,sharing=private \
 		ca-certificates \
 		build-essential \
 		wget && \
-	_MINICONDA_VERSION=py39_25.1.1-2 && \
+	_MINICONDA_VERSION=py310_25.5.1-0 && \
 	if [ "${_BUILD_TARGET_ARCH}" == "x86_64" ]; then \
 		_MINICONDA_FILENAME=Miniconda3-${_MINICONDA_VERSION}-Linux-x86_64.sh && \
 		export _MINICONDA_URL=https://repo.anaconda.com/miniconda/${_MINICONDA_FILENAME}; \
 	elif [ "${_BUILD_TARGET_ARCH}" == "aarch64" ]; then \
 		_MINICONDA_FILENAME=Miniconda3-${_MINICONDA_VERSION}-Linux-aarch64.sh && \
 		export _MINICONDA_URL=https://repo.anaconda.com/miniconda/${_MINICONDA_FILENAME}; \
-		# _MINIFORGE_VERSION=24.11.3-0 && \
-		# _MINICONDA_FILENAME=Miniforge3-${_MINIFORGE_VERSION}-Linux-aarch64.sh && \
-		# export _MINICONDA_URL=https://github.com/conda-forge/miniforge/releases/download/${_MINIFORGE_VERSION}/${_MINICONDA_FILENAME}; \
 	else \
 		echo "Unsupported platform: ${_BUILD_TARGET_ARCH}" && \
 		exit 1; \
@@ -51,6 +49,9 @@ RUN --mount=type=cache,target=/opt/conda/pkgs,sharing=private \
 		wget -nv --show-progress --progress=bar:force:noscroll "${_MINICONDA_URL}" -O "/root/.cache/${_MINICONDA_FILENAME}"; \
 	fi && \
 	/bin/bash "/root/.cache/${_MINICONDA_FILENAME}" -b -u -p /opt/conda && \
+	/opt/conda/condabin/conda tos accept --override-channels \
+		-c https://repo.anaconda.com/pkgs/main \
+		-c https://repo.anaconda.com/pkgs/r && \
 	/opt/conda/condabin/conda update -y conda && \
 	/opt/conda/condabin/conda install -y python=${PYTHON_VERSION} pip && \
 	/opt/conda/bin/pip install --timeout 60 -U pip
@@ -74,29 +75,30 @@ RUN	--mount=type=cache,target=/root/.cache,sharing=locked \
 FROM ${BASE_IMAGE} AS base
 
 ARG DEBIAN_FRONTEND
-ARG DFG_API_SLUG
+ARG DFP_PROXY_API_SLUG
 
-ARG DFG_HOME_DIR="/app"
-ARG DFG_API_DIR="${DFG_HOME_DIR}/${DFG_API_SLUG}"
-ARG DFG_API_DATA_DIR="/var/lib/${DFG_API_SLUG}"
-ARG DFG_API_LOGS_DIR="/var/log/${DFG_API_SLUG}"
-ARG DFG_API_TMP_DIR="/tmp/${DFG_API_SLUG}"
-# ARG DFG_API_MODELS_DIR="${DFG_API_DATA_DIR}/models"
-ARG DFG_API_PORT=8000
+ARG DFP_PROXY_HOME_DIR="/app"
+ARG DFP_PROXY_API_DIR="${DFP_PROXY_HOME_DIR}/${DFP_PROXY_API_SLUG}"
+ARG DFP_PROXY_API_DATA_DIR="/var/lib/${DFP_PROXY_API_SLUG}"
+ARG DFP_PROXY_API_LOGS_DIR="/var/log/${DFP_PROXY_API_SLUG}"
+ARG DFP_PROXY_API_TMP_DIR="/tmp/${DFP_PROXY_API_SLUG}"
+# ARG DFP_PROXY_API_MODELS_DIR="${DFP_PROXY_API_DATA_DIR}/models"
+ARG DFP_PROXY_API_PORT=8000
 ## IMPORTANT!: Get hashed password from build-arg!
-## echo "DFG_USER_PASSWORD123" | openssl passwd -5 -stdin
+## echo "DFP_PROXY_USER_PASSWORD123" | openssl passwd -5 -stdin
 ARG HASH_PASSWORD="\$5\$UN1S7dZEa/qDoijJ\$hJ5o.Wpp5aP2kp.46Y7lWgcsRE8/oRLVswU6Swi13fB"
 ARG UID=1000
 ARG GID=11000
-ARG USER=dfg-user
+ARG USER=dfp-user
 ARG GROUP=dfg-group
 
-ENV DFG_HOME_DIR="${DFG_HOME_DIR}" \
-	DFG_API_DIR="${DFG_API_DIR}" \
-	DFG_API_DATA_DIR="${DFG_API_DATA_DIR}" \
-	DFG_API_LOGS_DIR="${DFG_API_LOGS_DIR}" \
-	DFG_API_TMP_DIR="${DFG_API_TMP_DIR}" \
-	DFG_API_PORT=${DFG_API_PORT} \
+ENV DFP_PROXY_API_SLUG="${DFP_PROXY_API_SLUG}" \
+	DFP_PROXY_HOME_DIR="${DFP_PROXY_HOME_DIR}" \
+	DFP_PROXY_API_DIR="${DFP_PROXY_API_DIR}" \
+	DFP_PROXY_API_DATA_DIR="${DFP_PROXY_API_DATA_DIR}" \
+	DFP_PROXY_API_LOGS_DIR="${DFP_PROXY_API_LOGS_DIR}" \
+	DFP_PROXY_API_TMP_DIR="${DFP_PROXY_API_TMP_DIR}" \
+	DFP_PROXY_API_PORT=${DFP_PROXY_API_PORT} \
 	UID=${UID} \
 	GID=${GID} \
 	USER=${USER} \
@@ -105,7 +107,7 @@ ENV DFG_HOME_DIR="${DFG_HOME_DIR}" \
 	PYTHONUNBUFFERED=1 \
 	PATH="/opt/conda/bin:${PATH}"
 
-# ENV DFG_API_MODELS_DIR="${DFG_API_MODELS_DIR}"
+# ENV DFP_PROXY_API_MODELS_DIR="${DFP_PROXY_API_MODELS_DIR}"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -145,12 +147,12 @@ RUN rm -rfv /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* /root/.cache/*
 	echo ". /opt/conda/etc/profile.d/conda.sh" >> "/home/${USER}/.bashrc" && \
 	echo "conda activate base" >> "/home/${USER}/.bashrc" && \
 	rm -rfv /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* /root/.cache/* "/home/${USER}/.cache/*" && \
-	mkdir -pv "${DFG_API_DIR}" "${DFG_API_DATA_DIR}" "${DFG_API_LOGS_DIR}" "${DFG_API_TMP_DIR}" && \
-	chown -Rc "${USER}:${GROUP}" "${DFG_HOME_DIR}" "${DFG_API_DATA_DIR}" "${DFG_API_LOGS_DIR}" "${DFG_API_TMP_DIR}" && \
-	find "${DFG_API_DIR}" "${DFG_API_DATA_DIR}" -type d -exec chmod -c 770 {} + && \
-	find "${DFG_API_DIR}" "${DFG_API_DATA_DIR}" -type d -exec chmod -c ug+s {} + && \
-	find "${DFG_API_LOGS_DIR}" "${DFG_API_TMP_DIR}" -type d -exec chmod -c 775 {} + && \
-	find "${DFG_API_LOGS_DIR}" "${DFG_API_TMP_DIR}" -type d -exec chmod -c +s {} +
+	mkdir -pv "${DFP_PROXY_API_DIR}" "${DFP_PROXY_API_DATA_DIR}" "${DFP_PROXY_API_LOGS_DIR}" "${DFP_PROXY_API_TMP_DIR}" && \
+	chown -Rc "${USER}:${GROUP}" "${DFP_PROXY_HOME_DIR}" "${DFP_PROXY_API_DATA_DIR}" "${DFP_PROXY_API_LOGS_DIR}" "${DFP_PROXY_API_TMP_DIR}" && \
+	find "${DFP_PROXY_API_DIR}" "${DFP_PROXY_API_DATA_DIR}" -type d -exec chmod -c 770 {} + && \
+	find "${DFP_PROXY_API_DIR}" "${DFP_PROXY_API_DATA_DIR}" -type d -exec chmod -c ug+s {} + && \
+	find "${DFP_PROXY_API_LOGS_DIR}" "${DFP_PROXY_API_TMP_DIR}" -type d -exec chmod -c 775 {} + && \
+	find "${DFP_PROXY_API_LOGS_DIR}" "${DFP_PROXY_API_TMP_DIR}" -type d -exec chmod -c +s {} +
 
 ENV LANG=en_US.UTF-8 \
 	LANGUAGE=en_US.UTF-8 \
@@ -162,16 +164,16 @@ COPY --from=builder --chown=${UID}:${GID} /opt/conda /opt/conda
 ## Here is the final image:
 FROM base AS app
 
-WORKDIR "${DFG_API_DIR}"
-COPY --chown=${UID}:${GID} ./src ${DFG_API_DIR}
+WORKDIR "${DFP_PROXY_API_DIR}"
+COPY --chown=${UID}:${GID} ./src ${DFP_PROXY_API_DIR}
 COPY --chown=${UID}:${GID} --chmod=770 ./scripts/docker/*.sh /usr/local/bin/
 
-# VOLUME ["${DFG_API_DATA_DIR}"]
-# EXPOSE ${DFG_API_PORT}
+# VOLUME ["${DFP_PROXY_API_DATA_DIR}"]
+# EXPOSE ${DFP_PROXY_API_PORT}
 
 USER ${UID}:${GID}
 # HEALTHCHECK --start-period=30s --start-interval=1s --interval=5m --timeout=5s --retries=3 \
-# 	CMD curl -f http://localhost:${DFG_API_PORT}/api/v${DFG_API_VERSION:-1}/ping || exit 1
+# 	CMD curl -f http://localhost:${DFP_PROXY_API_PORT}/api/v${DFP_PROXY_API_VERSION:-1}/ping || exit 1
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-# CMD ["-b", "uvicorn main:app --host=0.0.0.0 --port=${DFG_API_PORT:-8000} --no-access-log --no-server-header --proxy-headers --forwarded-allow-ips='*'"]
+# CMD ["-b", "uvicorn main:app --host=0.0.0.0 --port=${DFP_PROXY_API_PORT:-8000} --no-access-log --no-server-header --proxy-headers --forwarded-allow-ips='*'"]

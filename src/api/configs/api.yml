@@ -2,8 +2,8 @@ env: "LOCAL"
 debug: false
 
 api:
-  name: "Device Fingerprinter Gate"
-  slug: "rest.device-fp-gate"
+  name: "Device Fingerprinter Proxy API"
+  slug: "rest.dfp-proxy"
   bind_host: "0.0.0.0"
   port: 8000
   version: "1"
