@@ -4,8 +4,8 @@ import os
 import pathlib
 
 import requests
-from fastapi import Request
 from pydantic import validate_call
+from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -32,7 +32,7 @@ def save_fingerprinter(request_id: str, fingerprinter: Fingerprinter) -> None:
         with open(_fp_js_path, "w") as _file:
             _file.write(fingerprinter.fingerprinter_js)
 
-        logger.success(f"[{request_id}] - Successfully saved fingerprinter.js.")
+        logger.info(f"[{request_id}] - Successfully saved fingerprinter.js.")
     except Exception:
         logger.exception(f"[{request_id}] - Failed to to save fingerprinter.js!")
         raise BaseHTTPException(
@@ -55,7 +55,7 @@ def get_web(request: Request, order_id: int) -> HTMLResponse:
             directory=os.path.join(_API_DIR, "templates", "html")
         )
         _html_response = _templates.TemplateResponse(request=request, name="index.html")
-        logger.success(
+        logger.info(
             f"[{_request_id}] - Successfully rendered HTML template for order ID {order_id}."
         )
     except Exception:
@@ -75,7 +75,12 @@ def submit_fingerprint(request_id: str, order_id: int, fingerprint: str) -> None
 
     logger.info(f"[{request_id}] - Submitting fingerprint for order ID {order_id}...")
     try:
-        _url = f"{config.challenge.base_url}/fingerprint"
+        _endpoint = "/fingerprint"
+        _base_url = str(config.challenge.base_url)
+        if _base_url.endswith("/"):
+            _base_url = _base_url.rstrip("/")
+
+        _url = f"{_base_url}{_endpoint}"
         _headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
@@ -85,7 +90,7 @@ def submit_fingerprint(request_id: str, order_id: int, fingerprint: str) -> None
         _response = requests.post(_url, headers=_headers, json=_payload)
         _response.raise_for_status()
 
-        logger.success(
+        logger.info(
             f"[{request_id}] - Successfully submitted fingerprint for order ID {order_id}."
         )
     except Exception:

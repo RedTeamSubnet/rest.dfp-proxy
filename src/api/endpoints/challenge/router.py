@@ -6,10 +6,10 @@ from fastapi import APIRouter, HTTPException, Request, Depends, Query, Body
 from api.core.constants import ErrorCodeEnum, ALPHANUM_HYPHEN_REGEX
 from api.core.responses import BaseResponse
 from api.core.exceptions import BaseHTTPException
+from api.core.dependencies.auth import auth_api_key
 from api.logger import logger
 
 from . import service
-from .dependencies import auth_api_key
 from .schemas import Fingerprinter
 
 
@@ -20,7 +20,6 @@ router = APIRouter(tags=["Challenge"])
     "/_fp-js",
     summary="Save miner fingerprinter",
     description="This endpoint retrieves the miner fingerprinter from the challenger container.",
-    status_code=200,
     dependencies=[Depends(auth_api_key)],
 )
 def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
@@ -28,7 +27,7 @@ def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
     _request_id = request.state.request_id
     logger.info(f"[{_request_id}] - Saving miner fingerprinter...")
     try:
-        service.save_fingerprinter(request=request, fingerprinter=fingerprinter)
+        service.save_fingerprinter(request_id=_request_id, fingerprinter=fingerprinter)
         logger.success(f"[{_request_id}] - Successfully saved miner fingerprinter.")
     except HTTPException:
         raise
@@ -82,7 +81,7 @@ def get_web(request: Request, order_id: int = Query(..., gt=0)):
 )
 def post_fingerprint(
     request: Request,
-    order_id: int = Body(..., gt=1),
+    order_id: int = Body(..., gt=0),
     fingerprint: str = Body(
         ..., min_length=1, max_length=128, pattern=ALPHANUM_HYPHEN_REGEX
     ),
@@ -92,7 +91,7 @@ def post_fingerprint(
     logger.info(f"[{request_id}] - Submitting fingerprint for order ID {order_id}...")
     try:
         service.submit_fingerprint(
-            request=request, order_id=order_id, fingerprint=fingerprint
+            request_id=request_id, order_id=order_id, fingerprint=fingerprint
         )
         logger.success(
             f"[{request_id}] - Successfully submitted fingerprint for order ID {order_id}."
