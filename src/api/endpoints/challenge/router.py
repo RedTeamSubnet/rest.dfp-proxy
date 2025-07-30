@@ -18,7 +18,7 @@ router = APIRouter(tags=["Challenge"])
 
 @router.post(
     "/_fp-js",
-    summary="Save Miner Fingerprinter",
+    summary="Save miner fingerprinter",
     description="This endpoint retrieves the miner fingerprinter from the challenger container.",
     status_code=200,
     dependencies=[Depends(auth_api_key)],

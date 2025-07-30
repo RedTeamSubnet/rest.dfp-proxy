@@ -47,21 +47,14 @@ def save_fingerprinter(request_id: str, fingerprinter: Fingerprinter) -> None:
 def get_web(request: Request, order_id: int) -> HTMLResponse:
 
     _request_id = request.state.request_id
-
     _html_response: HTMLResponse
+
     logger.info(f"[{_request_id}] - Rendering HTML template for order ID {order_id}...")
     try:
         _templates = Jinja2Templates(
             directory=os.path.join(_API_DIR, "templates", "html")
         )
-        _html_response = _templates.TemplateResponse(
-            request=request,
-            name="index.html",
-            context={
-                "base_url": config.challenge.base_url,
-                "order_id": order_id,
-            },
-        )
+        _html_response = _templates.TemplateResponse(request=request, name="index.html")
         logger.success(
             f"[{_request_id}] - Successfully rendered HTML template for order ID {order_id}."
         )
