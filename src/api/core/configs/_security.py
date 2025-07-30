@@ -117,7 +117,6 @@ class SecurityConfig(FrozenBaseConfig):
     password: PasswordConfig = Field(default_factory=PasswordConfig)
 
     model_config = SettingsConfigDict(env_prefix=_ENV_PREFIX_SECURITY)
-    auth_key: constr(strip_whitespace=True, min_length=16, max_length=256) = Field(...)  # type: ignore
 
 
 __all__ = [

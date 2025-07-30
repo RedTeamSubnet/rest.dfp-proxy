@@ -3,8 +3,8 @@
 from enum import Enum
 
 
-ENV_PREFIX = "DFG_"
-ENV_PREFIX_API = f"{ENV_PREFIX}API_"
+ENV_PREFIX = "DFP_"
+ENV_PREFIX_API = f"{ENV_PREFIX}PROXY_API_"
 
 
 class EnvEnum(str, Enum):

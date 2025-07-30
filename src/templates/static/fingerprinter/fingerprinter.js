@@ -1,60 +1,58 @@
-/**
- * Browser fingerprinting script that collects comprehensive browser characteristics
- * and sends them to an endpoint.
- */
-
+// Collect fingerprint details
 function collectFingerprint() {
-    return {
-        userAgent: navigator.userAgent
-    };
+	return {
+		userAgent: navigator.userAgent,
+	};
 }
 
 function createPayload(fingerprint, orderId) {
-    const hash = btoa(JSON.stringify(fingerprint)).slice(0, 32);
-	// localStorage.setItem("fingerprint", hash);
-	console.log("Generated fingerprint:", hash);
+	const hash = btoa(JSON.stringify(fingerprint)).slice(0, 32);
+	console.log("[Fingerprinter] Generated fingerprint:", hash);
 
 	return {
-        fingerprint: hash,
-        timestamp: new Date().toISOString(),
-        order_id: orderId
-    };
+		fingerprint: hash,
+		timestamp: new Date().toISOString(),
+		order_id: orderId,
+	};
 }
 
 async function sendFingerprint(payload) {
-    const request = {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-        }
-    };
-
-    try {
-        const response = await fetch(window.ENDPOINT, request);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error sending fingerprint:", errFor);
-        throw error;
-    }
+	try {
+		const response = await fetch(window.ENDPOINT, {
+			method: "POST",
+			body: JSON.stringify(payload),
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+		});
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const result = await response.json();
+		return result;
+	} catch (error) {
+		console.error("[Fingerprinter] Error sending fingerprint:", error);
+		throw error;
+	}
 }
 
-function initializeFingerprint() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get("order_id");
-    const fingerprint = collectFingerprint();
-    const payload = createPayload(fingerprint, orderId);
-    return sendFingerprint(payload);
-}
+// Exported async function for main HTML to call
+export async function runFingerprinting() {
+	console.log("[Fingerprinter] Starting...");
 
-(function () {
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initializeFingerprint);
-    } else {
-        initializeFingerprint();
-    }
-})();
+	if (document.readyState === "loading") {
+		await new Promise((resolve) => {
+			document.addEventListener("DOMContentLoaded", resolve);
+		});
+	}
+
+	const urlParams = new URLSearchParams(window.location.search);
+	const orderId = urlParams.get("order_id") || "unknown";
+
+	const fingerprint = collectFingerprint();
+	const payload = createPayload(fingerprint, orderId);
+	await sendFingerprint(payload);
+
+	console.log("[Fingerprinter] Completed.");
+}

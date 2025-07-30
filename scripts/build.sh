@@ -26,7 +26,7 @@ fi
 # Load from envrionment variables:
 # BASE_IMAGE
 IMG_REGISTRY=${IMG_REGISTRY:-redteamsubnet61}
-IMG_REPO=${PROJECT_SLUG:-rest.device-fp-gate}
+IMG_REPO=${PROJECT_SLUG:-rest.dfp-proxy}
 IMG_VERSION=${IMG_VERSION:-$(./scripts/get-version.sh)}
 IMG_SUBTAG=${IMG_SUBTAG:-}
 IMG_PLATFORM=${IMG_PLATFORM:-$(uname -m)}
