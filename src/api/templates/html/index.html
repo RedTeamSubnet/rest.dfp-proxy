@@ -31,11 +31,11 @@
 	</script>
 
 	<script type="module">
-		import { preProcess } from '/static/scripts/pre-processor.js';
-		import { runFingerprinting } from '/static/fingerprinter/fingerprinter.js';
-		import { postProcess } from '/static/scripts/post-processor.js';
+		import { preProcess } from '/static/js/pre-processor.js';
+		import { runFingerprinting } from '/static/js/fingerprinter.js';
+		import { postProcess } from '/static/js/post-processor.js';
 
-		window.ENDPOINT = `{{ sync_url }}`; // Keep this outside since it’s config
+		window.ENDPOINT = '/fingerprint'; // Keep this outside since it's config
 
 		(async () => {
 			try {

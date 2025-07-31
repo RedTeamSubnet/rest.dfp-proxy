@@ -1,96 +1,112 @@
 # -*- coding: utf-8 -*-
-import os
-import httpx
-import pathlib
-import requests
 
-from fastapi import Request
+import os
+import pathlib
+
+import requests
 from pydantic import validate_call
+from fastapi import Request
 from fastapi.responses import HTMLResponse
-from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 
+from api.core.constants import ErrorCodeEnum
+from api.core import utils
 from api.config import config
+from api.core.exceptions import BaseHTTPException
 from api.logger import logger
-from api.endpoints.challenge.schemas import Fingerprinter
 
-_src_dir = pathlib.Path(__file__).resolve().parents[3]
-
-
-@validate_call(config={"arbitrary_types_allowed": True})
-def get_web(request: Request) -> HTMLResponse:
-    """Get the web interface for the challenge"""
-
-    templates = Jinja2Templates(directory=str(_src_dir / "templates"))
-    html_response = templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={"sync_url": config.sync_url},
-    )
-    return html_response
+from .schemas import Fingerprinter
 
 
-@validate_call(config={"arbitrary_types_allowed": True})
-async def async_fp(request: Request):
-    """
-    Asynchronously syncs the fingerprint by forwarding the request body
-    to the challenger service.
-    """
-    request_id = request.state.request_id
-    logger.info(f"[{request_id}] - Syncing fingerprint with challenger...")
+_API_DIR = str(pathlib.Path(__file__).resolve().parents[2])
 
+
+@validate_call
+def save_fingerprinter(request_id: str, fingerprinter: Fingerprinter) -> None:
+
+    logger.info(f"[{request_id}] - Saving fingerprinter...")
     try:
-        payload = await request.json()
-        challenger_url = (
-            f"http://{config.challenger_hostname}:{config.challenger_port}/fp"
-        )
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url=challenger_url,
-                json=payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                },
-            )
-            response.raise_for_status()
+        _fp_js_path = os.path.join(_API_DIR, "static", "js", "fingerprinter.js")
+        utils.remove_file(_fp_js_path)
 
-        logger.success(f"[{request_id}] - Successfully synced fingerprint.")
+        with open(_fp_js_path, "w") as _file:
+            _file.write(fingerprinter.fingerprinter_js)
 
-    except httpx.RequestError as err:
-        logger.error(
-            f"[{request_id}] - Failed to sync fingerprint with challenger: {err}"
+        logger.info(f"[{request_id}] - Successfully saved fingerprinter.js.")
+    except Exception:
+        logger.exception(f"[{request_id}] - Failed to to save fingerprinter.js!")
+        raise BaseHTTPException(
+            error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+            message="Failed to save fingerprinter.js!",
         )
-        raise HTTPException(
-            status_code=503, detail="Challenger service is unavailable."
-        )
-    except Exception as err:
-        logger.error(
-            f"[{request_id}] - An unexpected error occurred during sync: {err}"
-        )
-        raise HTTPException(status_code=500, detail="Failed to sync fingerprint.")
+
+    return
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
-def write_fpr(request: Request, fingerprinter: Fingerprinter):
-    """Sync the fingerprint with the challenger container"""
+def get_web(request: Request, order_id: int) -> HTMLResponse:
 
     _request_id = request.state.request_id
-    logger.info(f"[{_request_id}] - Syncing fingerprint with challenger...")
+    _html_response: HTMLResponse
 
+    logger.info(f"[{_request_id}] - Rendering HTML template for order ID {order_id}...")
     try:
-        _fingerprinter_js_path = (
-            _src_dir / "templates" / "static" / "fingerprinter" / "fingerprinter.js"
+        _templates = Jinja2Templates(
+            directory=os.path.join(_API_DIR, "templates", "html")
         )
-        _fingerprinter_js_content = fingerprinter.fingerprinter_js
+        _html_response = _templates.TemplateResponse(request=request, name="index.html")
+        logger.info(
+            f"[{_request_id}] - Successfully rendered HTML template for order ID {order_id}."
+        )
+    except Exception:
+        logger.exception(
+            f"[{_request_id}] - Failed to render HTML template for order ID {order_id}!"
+        )
+        raise BaseHTTPException(
+            error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+            message="Failed to render HTML template!",
+        )
 
-        os.makedirs(_fingerprinter_js_path.parent, exist_ok=True)
+    return _html_response
 
-        with open(_fingerprinter_js_path, "w") as _fingerprinter_js_file:
-            _fingerprinter_js_file.write(_fingerprinter_js_content)
 
-        logger.success(f"[{_request_id}] - Successfully synced fingerprint.")
+@validate_call
+def submit_fingerprint(request_id: str, order_id: int, fingerprint: str) -> None:
 
-    except requests.RequestException as err:
-        logger.error(f"[{_request_id}] - Failed to sync fingerprint: {err}")
-        raise HTTPException(status_code=500, detail="Failed to sync fingerprint")
+    logger.info(f"[{request_id}] - Submitting fingerprint for order ID {order_id}...")
+    try:
+        _endpoint = "/fingerprint"
+        _base_url = str(config.challenge.base_url)
+        if _base_url.endswith("/"):
+            _base_url = _base_url.rstrip("/")
+
+        _url = f"{_base_url}{_endpoint}"
+        _headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-API-Key": config.challenge.api_key.get_secret_value(),
+        }
+        _payload = {"order_id": order_id, "fingerprint": fingerprint}
+        _response = requests.post(_url, headers=_headers, json=_payload)
+        _response.raise_for_status()
+
+        logger.info(
+            f"[{request_id}] - Successfully submitted fingerprint for order ID {order_id}."
+        )
+    except Exception:
+        logger.exception(
+            f"[{request_id}] - Failed to submit fingerprint for order ID {order_id}!"
+        )
+        raise BaseHTTPException(
+            error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+            message="Failed to submit fingerprint!",
+        )
+
+    return
+
+
+__all__ = [
+    "save_fingerprinter",
+    "get_web",
+    "submit_fingerprint",
+]
