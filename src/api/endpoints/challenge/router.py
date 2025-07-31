@@ -1,90 +1,117 @@
 # -*- coding: utf-8 -*-
 
-import httpx
 from fastapi.responses import HTMLResponse
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Query, Body
+
+from api.core.constants import ErrorCodeEnum, ALPHANUM_HYPHEN_REGEX
+from api.core.responses import BaseResponse
+from api.core.exceptions import BaseHTTPException
+from api.core.dependencies.auth import auth_api_key
+from api.logger import logger
 
 from . import service
-from api.logger import logger
-from api.config import config
-from api.endpoints.challenge.utils import verify_token
-from api.endpoints.challenge.schemas import Fingerprinter
+from .schemas import Fingerprinter
+
 
 router = APIRouter(tags=["Challenge"])
 
 
 @router.post(
-    "/fpr",
-    summary="Get Miner Fingerprinter",
+    "/_fp-js",
+    summary="Save miner fingerprinter",
     description="This endpoint retrieves the miner fingerprinter from the challenger container.",
-    status_code=200,
-    dependencies=[Depends(verify_token)],
+    dependencies=[Depends(auth_api_key)],
 )
-def fpr(request: Request, fingerprinter: Fingerprinter) -> dict:
-    """
-    Receives and stores the miner fingerprinter data.
-    """
-    request_id = request.state.request_id
-    logger.info(f"[{request_id}] - Storing miner fingerprinter...")
+def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
 
+    _request_id = request.state.request_id
+    logger.info(f"[{_request_id}] - Saving miner fingerprinter...")
     try:
-        service.write_fpr(request=request, fingerprinter=fingerprinter)
-        logger.success(f"[{request_id}] - Successfully stored miner fingerprinter.")
-        return {"status": "success", "message": "Fingerprinter stored."}
-    except Exception as err:
-        logger.error(f"[{request_id}] - Failed to store miner fingerprinter: {err}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        service.save_fingerprinter(request_id=_request_id, fingerprinter=fingerprinter)
+        logger.success(f"[{_request_id}] - Successfully saved miner fingerprinter.")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception(f"[{_request_id}] - Failed to save miner fingerprinter!")
+        raise BaseHTTPException(
+            error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+            message="Failed to save miner fingerprinter!",
+        )
+
+    _response = BaseResponse(
+        request=request,
+        message="Successfully saved miner fingerprinter.",
+    )
+    return _response
 
 
 @router.get(
-    "/_web",
+    "/web",
     summary="Serves the webpage",
     description="This endpoint serves the webpage for the challenge.",
     response_class=HTMLResponse,
 )
-async def get_web(request: Request) -> HTMLResponse:
-    """
-    Serves the main challenge webpage.
-    """
-    request_id = request.state.request_id
-    logger.info(f"[{request_id}] - Serving webpage...")
+def get_web(request: Request, order_id: int = Query(..., gt=0)):
 
+    _request_id = request.state.request_id
+    logger.info(f"[{_request_id}] - Serving webpage for order ID {order_id}...")
     try:
-        html_response = service.get_web(request=request)
-        logger.success(f"[{request_id}] - Successfully served webpage.")
-        return html_response
+        _html_response = service.get_web(request=request, order_id=order_id)
+        logger.success(
+            f"[{_request_id}] - Successfully served webpage for order ID {order_id}."
+        )
     except HTTPException:
         raise
-    except Exception as err:
-        logger.error(f"[{request_id}] - Failed to serve webpage: {err}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    except Exception:
+        logger.exception(
+            f"[{_request_id}] - Failed to serve webpage for order ID {order_id}!"
+        )
+        raise BaseHTTPException(
+            error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+            message="Failed to serve webpage!",
+        )
+
+    return _html_response
 
 
 @router.post(
-    "/fp",
-    summary="Syncs the fingerprint",
-    description="This endpoint receives the fingerprint data and forwards it.",
+    "/fingerprint",
+    summary="Submit the fingerprint",
+    description="This endpoint receives the fingerprint data and submit it to challenger service.",
 )
-async def sync_fp(request: Request) -> dict:
-    """
-    Receives fingerprint data and syncs it with another service.
-    """
-    request_id = request.state.request_id
-    logger.info(f"[{request_id}] - Syncing fingerprint...")
+def post_fingerprint(
+    request: Request,
+    order_id: int = Body(..., gt=0),
+    fingerprint: str = Body(
+        ..., min_length=1, max_length=128, pattern=ALPHANUM_HYPHEN_REGEX
+    ),
+):
 
+    request_id = request.state.request_id
+    logger.info(f"[{request_id}] - Submitting fingerprint for order ID {order_id}...")
     try:
-        # Assumes service.sync_fp is an async function using httpx
-        await service.async_fp(request=request)
-        logger.success(f"[{request_id}] - Successfully synced fingerprint.")
-        return {"status": "success", "message": "Fingerprint synced successfully."}
-    except httpx.RequestError as err:
-        logger.error(f"[{request_id}] - Failed to forward fingerprint data: {err}")
-        raise HTTPException(
-            status_code=502, detail="Bad Gateway: Upstream service failed."
+        service.submit_fingerprint(
+            request_id=request_id, order_id=order_id, fingerprint=fingerprint
         )
-    except Exception as err:
-        logger.error(f"[{request_id}] - Failed to sync fingerprint: {err}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        logger.success(
+            f"[{request_id}] - Successfully submitted fingerprint for order ID {order_id}."
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception(
+            f"[{request_id}] - Failed to submit fingerprint for order ID {order_id}!"
+        )
+        raise BaseHTTPException(
+            error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
+            message="Failed to submit fingerprint!",
+        )
+
+    _response = BaseResponse(
+        request=request,
+        message="Successfully submitted fingerprint.",
+    )
+    return _response
 
 
 __all__ = [
