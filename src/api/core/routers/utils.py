@@ -5,7 +5,6 @@ from typing import Optional
 from pydantic import IPvAnyAddress
 from fastapi import APIRouter, Request, Query, Depends
 
-
 from api.core import utils
 from api.config import config
 from api.core.schemas import BaseResPM
