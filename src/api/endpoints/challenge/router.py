@@ -55,7 +55,7 @@ def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
     responses={422: {}},
     response_class=HTMLResponse,
 )
-def get_web(request: Request, order_id: int = Query(..., gt=0, lt=1000000)):
+def get_web(request: Request, order_id: int = Query(..., ge=0, lt=1000000)):
 
     _request_id = request.state.request_id
     logger.info(f"[{_request_id}] - Serving webpage for order ID {order_id}...")
@@ -87,9 +87,9 @@ def get_web(request: Request, order_id: int = Query(..., gt=0, lt=1000000)):
 )
 def post_fingerprint(
     request: Request,
-    order_id: int = Body(..., gt=0, lt=1000000),
+    order_id: int = Body(..., ge=0, lt=1000000),
     fingerprint: str = Body(
-        ..., min_length=1, max_length=128, pattern=ALPHANUM_HYPHEN_REGEX
+        ..., min_length=2, max_length=128, pattern=ALPHANUM_HYPHEN_REGEX
     ),
 ):
 
