@@ -75,7 +75,7 @@ def submit_fingerprint(request_id: str, order_id: int, fingerprint: str) -> None
 
     logger.info(f"[{request_id}] - Submitting fingerprint for order ID {order_id}...")
     try:
-        _endpoint = "/fingerprint"
+        _endpoint = "/_fingerprint"
         _base_url = str(config.challenge.base_url).rstrip("/")
 
         _url = f"{_base_url}{_endpoint}"

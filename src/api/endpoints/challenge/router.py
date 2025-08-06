@@ -49,7 +49,7 @@ def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
 
 
 @router.get(
-    "/web",
+    "/_web",
     summary="Serves the webpage",
     description="This endpoint serves the webpage for the challenge.",
     responses={422: {}},
