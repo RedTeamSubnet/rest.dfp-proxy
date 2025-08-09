@@ -73,12 +73,7 @@ class MetaResPM(ExtraBasePM):
     )
     base_url: Optional[
         constr(strip_whitespace=True, min_length=2, max_length=256)  # type: ignore
-    ] = Field(
-        default=None,
-        title="Base URL",
-        description="Current request base URL.",
-        examples=["https://api.theredteam.io"],
-    )
+    ] = Field(default=None, title="Base URL", description="Current request base URL.")
     method: Optional[MethodEnum] = Field(
         default=None,
         title="Method",
