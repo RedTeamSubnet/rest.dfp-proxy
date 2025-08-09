@@ -1,5 +1,5 @@
 services:
-  api:
+  dfp-proxy-api:
     volumes:
       - "./volumes/storage/rest.dfp-proxy/logs:${DFP_PROXY_API_LOGS_DIR:-/var/log/rest.dfp-proxy}"
       - "./volumes/storage/rest.dfp-proxy/data:${DFP_PROXY_API_DATA_DIR:-/var/lib/rest.dfp-proxy}"

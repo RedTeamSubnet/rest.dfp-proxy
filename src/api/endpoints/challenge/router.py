@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi import APIRouter, HTTPException, Request, Depends, Query, Body
 
 from api.core.constants import ErrorCodeEnum, ALPHANUM_HYPHEN_REGEX
+from api.core.schemas import BaseResPM
 from api.core.responses import BaseResponse
 from api.core.exceptions import BaseHTTPException
 from api.core.dependencies.auth import auth_api_key
@@ -20,6 +21,8 @@ router = APIRouter(tags=["Challenge"])
     "/_fp-js",
     summary="Save miner fingerprinter",
     description="This endpoint retrieves the miner fingerprinter from the challenger container.",
+    response_model=BaseResPM,
+    responses={401: {}, 422: {}},
     dependencies=[Depends(auth_api_key)],
 )
 def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
@@ -46,12 +49,13 @@ def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
 
 
 @router.get(
-    "/web",
+    "/_web",
     summary="Serves the webpage",
     description="This endpoint serves the webpage for the challenge.",
+    responses={422: {}},
     response_class=HTMLResponse,
 )
-def get_web(request: Request, order_id: int = Query(..., gt=0)):
+def get_web(request: Request, order_id: int = Query(..., ge=0, lt=1000000)):
 
     _request_id = request.state.request_id
     logger.info(f"[{_request_id}] - Serving webpage for order ID {order_id}...")
@@ -78,12 +82,14 @@ def get_web(request: Request, order_id: int = Query(..., gt=0)):
     "/fingerprint",
     summary="Submit the fingerprint",
     description="This endpoint receives the fingerprint data and submit it to challenger service.",
+    response_model=BaseResPM,
+    responses={422: {}},
 )
 def post_fingerprint(
     request: Request,
-    order_id: int = Body(..., gt=0),
+    order_id: int = Body(..., ge=0, lt=1000000),
     fingerprint: str = Body(
-        ..., min_length=1, max_length=128, pattern=ALPHANUM_HYPHEN_REGEX
+        ..., min_length=2, max_length=128, pattern=ALPHANUM_HYPHEN_REGEX
     ),
 ):
 

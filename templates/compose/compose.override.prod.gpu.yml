@@ -1,5 +1,5 @@
 services:
-  api:
+  dfp-proxy-api:
     image: redteamsubnet61/rest.dfp-proxy:0.0.0-250101-gpu
     runtime: nvidia
     environment:
