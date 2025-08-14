@@ -1,5 +1,5 @@
 {
-	"name": "dfg",
+	"name": "dfp-proxy",
 	"interpreter": "/usr/bin/env",
 	"script": "python",
 	"args": "-u -m src.api",

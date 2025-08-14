@@ -8,6 +8,7 @@ services:
       TERM: ${TERM:-xterm}
       TZ: ${TZ:-UTC}
       DFP_PROXY_API_PORT: ${DFP_PROXY_API_PORT:-8000}
+      DFP_CHALLENGE_API_KEY: ${DFP_CHALLENGE_API_KEY}
     env_file:
       - path: .env
         required: false

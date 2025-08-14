@@ -30,7 +30,7 @@ def post_fingerprinter(request: Request, fingerprinter: Fingerprinter):
     _request_id = request.state.request_id
     logger.info(f"[{_request_id}] - Saving miner fingerprinter...")
     try:
-        service.save_fingerprinter(request_id=_request_id, fingerprinter=fingerprinter)
+        service.save_fingerprinter(fingerprinter=fingerprinter)
         logger.success(f"[{_request_id}] - Successfully saved miner fingerprinter.")
     except HTTPException:
         raise
@@ -60,7 +60,7 @@ def get_web(request: Request, order_id: int = Query(..., ge=0, lt=1000000)):
     _request_id = request.state.request_id
     logger.info(f"[{_request_id}] - Serving webpage for order ID {order_id}...")
     try:
-        _html_response = service.get_web(request=request, order_id=order_id)
+        _html_response = service.get_web(request=request)
         logger.success(
             f"[{_request_id}] - Successfully served webpage for order ID {order_id}."
         )
@@ -93,20 +93,18 @@ def post_fingerprint(
     ),
 ):
 
-    request_id = request.state.request_id
-    logger.info(f"[{request_id}] - Submitting fingerprint for order ID {order_id}...")
+    _request_id = request.state.request_id
+    logger.info(f"[{_request_id}] - Submitting fingerprint for order ID {order_id}...")
     try:
-        service.submit_fingerprint(
-            request_id=request_id, order_id=order_id, fingerprint=fingerprint
-        )
+        service.submit_fingerprint(order_id=order_id, fingerprint=fingerprint)
         logger.success(
-            f"[{request_id}] - Successfully submitted fingerprint for order ID {order_id}."
+            f"[{_request_id}] - Successfully submitted fingerprint for order ID {order_id}."
         )
     except HTTPException:
         raise
     except Exception:
         logger.exception(
-            f"[{request_id}] - Failed to submit fingerprint for order ID {order_id}!"
+            f"[{_request_id}] - Failed to submit fingerprint for order ID {order_id}!"
         )
         raise BaseHTTPException(
             error_enum=ErrorCodeEnum.INTERNAL_SERVER_ERROR,
