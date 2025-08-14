@@ -8,18 +8,9 @@ This is a short description of the project.
 
 ## ✨ Features
 
-- FastAPI
-- REST API
-- Web service
-- Microservice
-- Configuration
-- Tests
-- Build
-- Scripts
-- Examples
-- Documentation
-- CI/CD
-- Docker and docker compose
+- Device Fingerprinter Challenge
+- Proxy API server
+- RedTeam Subnet
 
 ---
 
@@ -27,16 +18,10 @@ This is a short description of the project.
 
 ### 1. 🚧 Prerequisites
 
-<!-- *[OPTIONAL]* For **GPU (NVIDIA)**:
-
-- Install **NVIDIA GPU driver (>= v453)** -->
-
 [RECOMMENDED] For **docker** runtime:
 
 - Install [**docker** and **docker compose**](https://docs.docker.com/engine/install)
     - Docker image: [**redteamsubnet61/rest.dfp-proxy**](https://hub.docker.com/r/redteamsubnet61/rest.dfp-proxy)
-<!-- - *[OPTIONAL]* For **GPU (NVIDIA)**:
-    - Install **[NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) (>= v1)** -->
 
 For **standalone** runtime:
 
@@ -44,8 +29,6 @@ For **standalone** runtime:
     - **[RECOMMENDED] [Miniconda (v3)](https://www.anaconda.com/docs/getting-started/miniconda/install)**
     - *[arm64/aarch64] [Miniforge (v3)](https://github.com/conda-forge/miniforge)*
     - *[Python virutal environment] [venv](https://docs.python.org/3/library/venv.html)*
-<!-- - *[OPTIONAL]* For **GPU (NVIDIA)**:
-    - Install **NVIDIA CUDA (>= v11)** and **cuDNN (>= v8)** -->
 
 [OPTIONAL] For **DEVELOPMENT** environment:
 
@@ -90,36 +73,12 @@ git clone git@github.com:RedTeam/rest.dfp-proxy.git && \
 
 [TIP] Skip this step, if you're going to use **docker** runtime
 
-<!-- #### 3.1. Install base/common dependencies -->
-
 ```sh
 pip install -r ./requirements.txt
 
 # For DEVELOPMENT:
 pip install -r ./requirements/requirements.dev.txt
 ```
-
-<!-- #### 3.2. Install hardware specific dependencies
-
-Follow the one of below instructions based on your environment (A is recommended for most cases):
-
-**OPTION A.** For Intel/AMD **x86_64** CPU:
-
-```sh
-pip install -r ./requirements/requirements.amd64.txt
-```
-
-**OPTION B.** For **arm64/aarch64** CPU:
-
-```sh
-pip install -r ./requirements/requirements.arm64.txt
-```
-
-**OPTION C.** For **NVIDIA GPU** and **x86_64** CPU:
-
-```sh
-pip install -r ./requirements/requirements.gpu.txt
-``` -->
 
 ### 4. 🌎 Configure environment variables
 
@@ -305,18 +264,25 @@ pm2 stop ./pm2-process.json && \
 ENV=LOCAL
 DEBUG=false
 # TZ=UTC
+# PYTHONDONTWRITEBYTECODE=1
 
 
-## -- API configs -- ##
+## -- DFP Proxy API configs -- ##
 DFP_PROXY_API_PORT=8000
 # DFP_PROXY_API_LOGS_DIR="/var/log/rest.dfp-proxy"
 # DFP_PROXY_API_DATA_DIR="/var/lib/rest.dfp-proxy"
+
 # DFP_PROXY_API_VERSION="1"
 # DFP_PROXY_API_PREFIX="/api/v{api_version}"
 # DFP_PROXY_API_DOCS_ENABLED=true
 # DFP_PROXY_API_DOCS_OPENAPI_URL="{api_prefix}/openapi.json"
 # DFP_PROXY_API_DOCS_DOCS_URL="{api_prefix}/docs"
 # DFP_PROXY_API_DOCS_REDOC_URL="{api_prefix}/redoc"
+
+
+## -- DFP Challenge configs -- ##
+DFP_CHALLENGE_API_KEY="your_api_key_here"  # !!! CHANGE THIS TO REAL API KEY !!!
+DFP_CHALLENGE_BASE_URL="http://localhost:10001"
 ```
 
 ### 🔧 Command arguments
