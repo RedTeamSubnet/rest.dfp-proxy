@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.0-250826 (2025-08-26)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+
+
+**Full Changelog**: https://github.com/RedTeamSubnet/rest.dfp-proxy/compare/v0.0.1-250814...v0.1.0-250826
+
 ## v0.0.1-250814 (2025-08-14)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
@@ -15,5 +23,3 @@
 * @bybatkhuu made their first contribution in https://github.com/RedTeamSubnet/rest.dfp-proxy/pull/4
 
 **Full Changelog**: https://github.com/RedTeamSubnet/rest.dfp-proxy/commits/v0.0.1-250814
-
-
