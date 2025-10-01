@@ -1,25 +1,16 @@
 # Device Fingerprinter Proxy API
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RedTeam/rest.dfp-proxy/3.create-release.yml?logo=GitHub)](https://github.com/RedTeam/rest.dfp-proxy/actions/workflows/3.create-release.yml)
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/RedTeam/rest.dfp-proxy?logo=GitHub)](https://github.com/RedTeam/rest.dfp-proxy/releases)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/RedTeamSubnet/rest.dfp-proxy/3.create-release.yml?logo=GitHub)](https://github.com/RedTeamSubnet/rest.dfp-proxy/actions/workflows/3.create-release.yml)
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/RedTeamSubnet/rest.dfp-proxy?logo=GitHub)](https://github.com/RedTeamSubnet/rest.dfp-proxy/releases)
 
 This is a short description of the project.
 
 ## ✨ Features
 
-- FastAPI
-- REST API
-- Web service
-- Microservice
-- Configuration
-- Tests
-- Build
-- Scripts
-- Examples
-- Documentation
-- CI/CD
-- Docker and docker compose
+- Device Fingerprinter Challenge
+- Proxy API server
+- RedTeam Subnet
 
 ---
 
@@ -27,16 +18,10 @@ This is a short description of the project.
 
 ### 1. 🚧 Prerequisites
 
-<!-- *[OPTIONAL]* For **GPU (NVIDIA)**:
-
-- Install **NVIDIA GPU driver (>= v453)** -->
-
 [RECOMMENDED] For **docker** runtime:
 
 - Install [**docker** and **docker compose**](https://docs.docker.com/engine/install)
     - Docker image: [**redteamsubnet61/rest.dfp-proxy**](https://hub.docker.com/r/redteamsubnet61/rest.dfp-proxy)
-<!-- - *[OPTIONAL]* For **GPU (NVIDIA)**:
-    - Install **[NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) (>= v1)** -->
 
 For **standalone** runtime:
 
@@ -44,8 +29,6 @@ For **standalone** runtime:
     - **[RECOMMENDED] [Miniconda (v3)](https://www.anaconda.com/docs/getting-started/miniconda/install)**
     - *[arm64/aarch64] [Miniforge (v3)](https://github.com/conda-forge/miniforge)*
     - *[Python virutal environment] [venv](https://docs.python.org/3/library/venv.html)*
-<!-- - *[OPTIONAL]* For **GPU (NVIDIA)**:
-    - Install **NVIDIA CUDA (>= v11)** and **cuDNN (>= v8)** -->
 
 [OPTIONAL] For **DEVELOPMENT** environment:
 
@@ -69,7 +52,7 @@ cd ~/workspaces/projects
 **OPTION A.** Clone the repository:
 
 ```sh
-git clone https://github.com/RedTeam/rest.dfp-proxy.git && \
+git clone https://github.com/RedTeamSubnet/rest.dfp-proxy.git && \
     cd rest.dfp-proxy
 ```
 
@@ -82,7 +65,7 @@ git clone git@github.com:RedTeam/rest.dfp-proxy.git && \
 
 **OPTION C.** Download source code:
 
-1. Download archived **zip** or **tar.gz** file from [**releases**](https://github.com/RedTeam/rest.dfp-proxy/releases).
+1. Download archived **zip** or **tar.gz** file from [**releases**](https://github.com/RedTeamSubnet/rest.dfp-proxy/releases).
 2. Extract it into the projects directory.
 3. Enter into the project directory.
 
@@ -90,36 +73,12 @@ git clone git@github.com:RedTeam/rest.dfp-proxy.git && \
 
 [TIP] Skip this step, if you're going to use **docker** runtime
 
-<!-- #### 3.1. Install base/common dependencies -->
-
 ```sh
 pip install -r ./requirements.txt
 
 # For DEVELOPMENT:
 pip install -r ./requirements/requirements.dev.txt
 ```
-
-<!-- #### 3.2. Install hardware specific dependencies
-
-Follow the one of below instructions based on your environment (A is recommended for most cases):
-
-**OPTION A.** For Intel/AMD **x86_64** CPU:
-
-```sh
-pip install -r ./requirements/requirements.amd64.txt
-```
-
-**OPTION B.** For **arm64/aarch64** CPU:
-
-```sh
-pip install -r ./requirements/requirements.arm64.txt
-```
-
-**OPTION C.** For **NVIDIA GPU** and **x86_64** CPU:
-
-```sh
-pip install -r ./requirements/requirements.gpu.txt
-``` -->
 
 ### 4. 🌎 Configure environment variables
 
@@ -298,32 +257,39 @@ pm2 stop ./pm2-process.json && \
 
 ### 🌎 Environment Variables
 
-[**`.env.example`**](https://github.com/RedTeam/rest.dfp-proxy/blob/main/.env.example):
+[**`.env.example`**](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/.env.example):
 
 ```sh
 ## --- Environment variable --- ##
 ENV=LOCAL
 DEBUG=false
 # TZ=UTC
+# PYTHONDONTWRITEBYTECODE=1
 
 
-## -- API configs -- ##
+## -- DFP Proxy API configs -- ##
 DFP_PROXY_API_PORT=8000
 # DFP_PROXY_API_LOGS_DIR="/var/log/rest.dfp-proxy"
 # DFP_PROXY_API_DATA_DIR="/var/lib/rest.dfp-proxy"
+
 # DFP_PROXY_API_VERSION="1"
 # DFP_PROXY_API_PREFIX="/api/v{api_version}"
 # DFP_PROXY_API_DOCS_ENABLED=true
 # DFP_PROXY_API_DOCS_OPENAPI_URL="{api_prefix}/openapi.json"
 # DFP_PROXY_API_DOCS_DOCS_URL="{api_prefix}/docs"
 # DFP_PROXY_API_DOCS_REDOC_URL="{api_prefix}/redoc"
+
+
+## -- DFP Challenge configs -- ##
+DFP_CHALLENGE_API_KEY="your_api_key_here"  # !!! CHANGE THIS TO REAL API KEY !!!
+DFP_CHALLENGE_BASE_URL="http://localhost:10001"
 ```
 
 ### 🔧 Command arguments
 
 You can customize the command arguments to debug or run the service with different commands.
 
-[**`compose.override.yml`**](https://github.com/RedTeam/rest.dfp-proxy/blob/main/templates/compose/compose.override.dev.yml):
+[**`compose.override.yml`**](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/templates/compose/compose.override.dev.yml):
 
 ```yml
     command: ["/bin/bash"]
@@ -382,52 +348,52 @@ mkdocs build
 
 ## 📚 Documentation
 
-- [Docs](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs)
-- [Home](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/README.md)
+- [Docs](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs)
+- [Home](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/README.md)
 
 ### Getting Started
 
-- [Prerequisites](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/getting-started/prerequisites.md)
-- [Installation](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/getting-started/installation.md)
-- [Quick start](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/getting-started/quick-start.md)
-- [Configuration](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/getting-started/configuration.md)
-- [Examples](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/getting-started/examples.md)
+- [Prerequisites](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/getting-started/prerequisites.md)
+- [Installation](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/getting-started/installation.md)
+- [Quick start](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/getting-started/quick-start.md)
+- [Configuration](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/getting-started/configuration.md)
+- [Examples](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/getting-started/examples.md)
 
 ### API Documentation
 
-<!-- - [API Reference](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/api-docs/api-reference.md) -->
-- [openapi.json](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/api-docs/openapi.json)
-- [Error Codes](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/api-docs/error-codes.md)
+<!-- - [API Reference](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/api-docs/api-reference.md) -->
+- [openapi.json](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/api-docs/openapi.json)
+- [Error Codes](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/api-docs/error-codes.md)
 
 ### Development
 
-- [Test](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/test.md)
-- [Build](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/build.md)
-- [Docs](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/docs.md)
-- [Scripts](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/scripts/README.md)
-- [CI/CD](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/cicd/README.md)
-- [File Structure](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/file-structure.md)
-- [Sitemap](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/sitemap.md)
-- [Related projects](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/related-projects.md)
-- [Roadmap](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/roadmap.md)
-- [Contributing](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/dev/contributing.md)
+- [Test](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/test.md)
+- [Build](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/build.md)
+- [Docs](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/docs.md)
+- [Scripts](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/scripts/README.md)
+- [CI/CD](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/cicd/README.md)
+- [File Structure](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/file-structure.md)
+- [Sitemap](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/sitemap.md)
+- [Related projects](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/related-projects.md)
+- [Roadmap](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/roadmap.md)
+- [Contributing](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/dev/contributing.md)
 
 ### Research
 
-- [Reports](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/research/reports.md)
-- [Benchmarks](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/research/benchmarks.md)
-- [References](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/research/references.md)
+- [Reports](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/research/reports.md)
+- [Benchmarks](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/research/benchmarks.md)
+- [References](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/research/references.md)
 
-### [Release Notes](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/release-notes.md)
+### [Release Notes](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/release-notes.md)
 
-### [Blog](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/blog/index.md)
+### [Blog](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/blog/index.md)
 
 ### About
 
-- [FAQ](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/about/faq.md)
-- [Authors](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/about/authors.md)
-- [Contact](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/about/contact.md)
-- [License](https://github.com/RedTeam/rest.dfp-proxy/blob/main/docs/pages/about/license.md)
+- [FAQ](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/about/faq.md)
+- [Authors](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/about/authors.md)
+- [Contact](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/about/contact.md)
+- [License](https://github.com/RedTeamSubnet/rest.dfp-proxy/blob/main/docs/pages/about/license.md)
 
 ---
 

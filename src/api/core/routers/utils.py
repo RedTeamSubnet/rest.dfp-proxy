@@ -6,10 +6,11 @@ from pydantic import IPvAnyAddress
 from fastapi import APIRouter, Request, Query, Depends
 
 from api.core import utils
-from api.config import config
 from api.core.schemas import BaseResPM
 from api.core.responses import BaseResponse
 from api.core.dependencies.auth import auth_api_key
+from api.config import config
+from api.logger import logger
 
 
 router = APIRouter(tags=["Utils"])
@@ -40,7 +41,7 @@ async def get_ping(request: Request):
 @router.get(
     "/health",
     summary="Health",
-    description="Check health of all related backend services.",
+    description="Check health of related services and devices.",
     response_model=BaseResPM,
     responses={401: {}, 422: {}, 503: {}},
     dependencies=[Depends(auth_api_key)],
@@ -53,7 +54,7 @@ def get_health(
     _message = "Everything is OK."
     _data = {
         "checks": {
-            "api": {"status": "OK", "message": "API is up."},
+            "dfp-proxy": {"status": "OK", "message": "DFP Proxy API is up."},
             "devices": [],
         },
         "timestamp": utils.now_utc_dt(),
@@ -63,24 +64,25 @@ def get_health(
         device_ips = config.challenge.device_ips
 
     for _ip in device_ips:
+        logger.debug(f"Checking device with IP '{_ip}' is connected or not...")
         _device = {}
         if utils.is_reachable(host=str(_ip)):
             _device["status"] = "OK"
-            _device["message"] = f"Device with '{_ip}' IP is reachable."
+            _device["message"] = f"Device with '{_ip}' IP is connected."
             _device["ip"] = str(_ip)
+            logger.success(f"Device with IP '{_ip}' is connected.")
         else:
-            _status_code = 503
-            _message = "Some devices are not reachable!"
+            _message = "Some devices are not connected."
             _device["status"] = "FAIL"
-            _device["message"] = f"Device with '{_ip}' IP is not reachable!"
+            _device["message"] = f"Device with '{_ip}' IP is not connected!"
             _device["ip"] = str(_ip)
+            logger.warning(f"Device with IP '{_ip}' is not connected!")
 
         _data["checks"]["devices"].append(_device)
 
     return BaseResponse(
         request=request,
         content=_data,
-        status_code=_status_code,
         message=_message,
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate",
